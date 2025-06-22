@@ -3,16 +3,16 @@ import ROSLIB from 'roslib';
 
 // Responsive canvas dimensions
 const getCanvasDimensions = () => ({
-  width: Math.min(window.innerWidth - 40, 800),
-  height: Math.min(window.innerHeight * 0.6, 700)
+  width: Math.min(window.innerWidth - 40, 1200),
+  height: Math.min(window.innerHeight * 0.75, 800)
 });
 
 // Field constants
 const FIELD_WIDTH = 15.0; // meters
 const FIELD_HEIGHT = 8.0; // meters
 const GRID_SPACING = 1.0; // meters
-const ROBOT_RADIUS = 0.3; // meters in real world
-const ROBOT_ARROW_LENGTH = 0.5; // meters in real world
+const ROBOT_RADIUS = 0.4; // meters in real world
+const ROBOT_ARROW_LENGTH = 0.7; // meters in real world
 
 // URDF Field Elements
 const FIELD_ELEMENTS = [
@@ -51,6 +51,11 @@ interface RobotPosition extends Point {
   angle: number; // radians
   linearVelocity?: number;
   angularVelocity?: number;
+  covariance?: {
+    x: number;
+    y: number;
+    theta: number;
+  };
 }
 
 const GameField = () => {
@@ -96,10 +101,8 @@ const GameField = () => {
   }), [dimensions]);
 
   const meterToPixel = useCallback((mx: number, my: number): Point => ({
-x: dimensions.width - (Math.min(FIELD_WIDTH, Math.max(0, mx)) / FIELD_WIDTH) * dimensions.width,
-// Properly balanced parentheses now
-y: (Math.min(FIELD_HEIGHT, Math.max(0, my)) / FIELD_HEIGHT) * dimensions.height
-// Single balanced set of parentheses
+    x: dimensions.width - (Math.min(FIELD_WIDTH, Math.max(0, mx)) / FIELD_WIDTH) * dimensions.width,
+    y: (Math.min(FIELD_HEIGHT, Math.max(0, my)) / FIELD_HEIGHT) * dimensions.height
   }), [dimensions]);
 
   // Quaternion to Euler angle conversion
@@ -170,15 +173,25 @@ y: (Math.min(FIELD_HEIGHT, Math.max(0, my)) / FIELD_HEIGHT) * dimensions.height
         try {
           const pose = message.pose.pose;
           const twist = message.twist.twist;
-          
           const { yaw } = quaternionToEuler(pose.orientation);
+          
+          // Extract covariance values (indices 0, 7, 35 from the 6x6 matrix)
+          const covariance = message.pose.covariance;
+          const covX = covariance[0]; // Variance for x
+          const covY = covariance[7]; // Variance for y
+          const covTheta = covariance[35]; // Variance for theta
           
           setRobotPosition({
             x: pose.position.x,
             y: pose.position.y,
             angle: yaw,
             linearVelocity: twist.linear.x,
-            angularVelocity: twist.angular.z
+            angularVelocity: twist.angular.z,
+            covariance: {
+              x: covX,
+              y: covY,
+              theta: covTheta
+            }
           });
         } catch (error) {
           console.error('Error processing odometry message:', error);
@@ -379,8 +392,8 @@ y: (Math.min(FIELD_HEIGHT, Math.max(0, my)) / FIELD_HEIGHT) * dimensions.height
       ctx.beginPath();
       ctx.moveTo(pos.x, pos.y);
       ctx.lineTo(
-        pos.x + Math.cos(robotPosition.angle) * arrowLengthPx,
-        pos.y + Math.sin(robotPosition.angle) * arrowLengthPx
+        pos.x - Math.cos(robotPosition.angle) * arrowLengthPx,
+        pos.y - Math.sin(robotPosition.angle) * arrowLengthPx
       );
       ctx.stroke();
       
@@ -403,6 +416,22 @@ y: (Math.min(FIELD_HEIGHT, Math.max(0, my)) / FIELD_HEIGHT) * dimensions.height
           pos.x,
           pos.y + robotRadiusPx + 15
         );
+      }
+
+      // Draw covariance ellipse if available
+      if (robotPosition.covariance) {
+        const covX = Math.sqrt(robotPosition.covariance.x) * 100; // Convert variance to std dev and scale
+        const covY = Math.sqrt(robotPosition.covariance.y) * 100; // Convert variance to std dev and scale
+        
+        ctx.strokeStyle = 'rgba(255, 255, 0, 0.6)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.ellipse(
+          pos.x, pos.y,
+          covX, covY,
+          0, 0, Math.PI * 2
+        );
+        ctx.stroke();
       }
     }
 
@@ -525,18 +554,30 @@ y: (Math.min(FIELD_HEIGHT, Math.max(0, my)) / FIELD_HEIGHT) * dimensions.height
                   {(robotPosition.angle * 180/Math.PI).toFixed(1)}°
                 </span>
               </div>
-              <div style={styles.infoRow}>
-                <span>Linear Velocity:</span>
-                <span style={styles.infoValue}>
-                  {robotPosition.linearVelocity?.toFixed(3) ?? 'N/A'} m/s
-                </span>
-              </div>
-              <div style={styles.infoRow}>
-                <span>Angular Velocity:</span>
-                <span style={styles.infoValue}>
-                  {robotPosition.angularVelocity?.toFixed(3) ?? 'N/A'} rad/s
-                </span>
-              </div>
+              {robotPosition.covariance && (
+                <>
+                  <div style={styles.infoRow}>
+                    <span>Covariance X:</span>
+                    <span style={styles.infoValue}>
+                      {robotPosition.covariance.x.toExponential(2)}
+                    </span>
+                  </div>
+                  <div style={styles.infoRow}>
+                    <span>Covariance Y:</span>
+                    <span style={styles.infoValue}>
+                      {robotPosition.covariance.y.toExponential(2)}
+                    </span>
+                  </div>
+                  <div style={styles.infoRow}>
+                    <span>Covariance θ:</span>
+                    <span style={styles.infoValue}>
+                      {robotPosition.covariance.theta.toExponential(2)}
+                    </span>
+                  </div>
+                </>
+              )}
+            
+             
             </>
           ) : (
             <p style={styles.noData}>No robot data available</p>
