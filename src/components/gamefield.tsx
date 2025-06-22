@@ -13,6 +13,7 @@ const FIELD_HEIGHT = 8.0; // meters
 const GRID_SPACING = 1.0; // meters
 const ROBOT_RADIUS = 0.4; // meters in real world
 const ROBOT_ARROW_LENGTH = 0.7; // meters in real world
+const UNCERTAINTY_THRESHOLD = 1.0; // meters (2σ threshold)
 
 // URDF Field Elements
 const FIELD_ELEMENTS = [
@@ -376,13 +377,28 @@ const GameField = () => {
       const pos = meterToPixel(robotPosition.x, robotPosition.y);
       const robotRadiusPx = (ROBOT_RADIUS / FIELD_WIDTH) * dimensions.width;
       const arrowLengthPx = (ROBOT_ARROW_LENGTH / FIELD_WIDTH) * dimensions.width;
-      
+
+      // Calculate position uncertainty (2 * standard deviation)
+      let positionUncertainty = 0;
+      if (robotPosition.covariance) {
+        positionUncertainty = 2 * Math.sqrt(
+          Math.max(robotPosition.covariance.x, robotPosition.covariance.y)
+        );
+      }
+
+      // Determine robot color based on uncertainty threshold
+      const robotColor = positionUncertainty > UNCERTAINTY_THRESHOLD ? 
+        'rgba(255, 50, 50, 0.7)' :  // Red if uncertain
+        'rgba(0, 150, 255, 0.7)';   // Blue if confident
+
       // Draw robot body (circle)
-      ctx.fillStyle = 'rgba(0, 150, 255, 0.7)';
+      ctx.fillStyle = robotColor;
       ctx.beginPath();
       ctx.arc(pos.x, pos.y, robotRadiusPx, 0, Math.PI * 2);
       ctx.fill();
-      ctx.strokeStyle = 'rgba(0, 100, 200, 0.9)';
+      ctx.strokeStyle = positionUncertainty > UNCERTAINTY_THRESHOLD ? 
+        'rgba(200, 0, 0, 0.9)' :    // Dark red border if uncertain
+        'rgba(0, 100, 200, 0.9)';   // Dark blue border if confident
       ctx.lineWidth = 2;
       ctx.stroke();
       
@@ -397,7 +413,7 @@ const GameField = () => {
       );
       ctx.stroke();
       
-      // Draw position text
+      // Draw position text with uncertainty info
       ctx.fillStyle = 'white';
       ctx.font = 'bold 12px Arial';
       ctx.textAlign = 'center';
@@ -418,12 +434,22 @@ const GameField = () => {
         );
       }
 
+      // Add uncertainty value to the display
+      ctx.font = '10px Arial';
+      ctx.fillText(
+        `σ: ${positionUncertainty.toFixed(2)}m`,
+        pos.x,
+        pos.y + robotRadiusPx + 30
+      );
+
       // Draw covariance ellipse if available
       if (robotPosition.covariance) {
         const covX = Math.sqrt(robotPosition.covariance.x) * 100; // Convert variance to std dev and scale
         const covY = Math.sqrt(robotPosition.covariance.y) * 100; // Convert variance to std dev and scale
         
-        ctx.strokeStyle = 'rgba(255, 255, 0, 0.6)';
+        ctx.strokeStyle = positionUncertainty > UNCERTAINTY_THRESHOLD ? 
+          'rgba(255, 100, 100, 0.6)' : // Light red if uncertain
+          'rgba(255, 255, 0, 0.6)';    // Yellow if confident
         ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.ellipse(
@@ -559,25 +585,25 @@ const GameField = () => {
                   <div style={styles.infoRow}>
                     <span>Covariance X:</span>
                     <span style={styles.infoValue}>
-                      {robotPosition.covariance.x.toExponential(2)}
+                      {robotPosition.covariance.x.toFixed(2)}
                     </span>
                   </div>
                   <div style={styles.infoRow}>
                     <span>Covariance Y:</span>
                     <span style={styles.infoValue}>
-                      {robotPosition.covariance.y.toExponential(2)}
+                      {robotPosition.covariance.y.toFixed(2)}
                     </span>
                   </div>
                   <div style={styles.infoRow}>
                     <span>Covariance θ:</span>
                     <span style={styles.infoValue}>
-                      {robotPosition.covariance.theta.toExponential(2)}
+                      {robotPosition.covariance.theta.toFixed(2)}
                     </span>
                   </div>
                 </>
               )}
-            
              
+           
             </>
           ) : (
             <p style={styles.noData}>No robot data available</p>
