@@ -163,6 +163,11 @@ const GameField = () => {
       });
       dashboardCoordsTopicRef.current.advertise();
 
+
+
+
+
+      
       // Subscribe to odometry topic
       odomTopicRef.current = new ROSLIB.Topic({
         ros,
@@ -199,6 +204,12 @@ const GameField = () => {
         }
       });
     };
+
+
+
+
+
+
 
     const handleError = (error: any) => {
       console.error('❌ ROS connection error:', error);
@@ -248,6 +259,12 @@ const GameField = () => {
       }
     };
   }, [isMobile, connectionAttempts]);
+
+
+
+
+
+
 
   // Publish coordinates with validation
   const publishDashboardCoords = useCallback((x: number, y: number) => {
@@ -346,6 +363,9 @@ const GameField = () => {
       ctx.fillText(`${y}m`, dimensions.width - 30, py + 15);
     }
 
+
+
+
     // Draw field elements
     FIELD_ELEMENTS.forEach(element => {
       const pos = meterToPixel(element.position.x, element.position.y);
@@ -371,6 +391,11 @@ const GameField = () => {
         ctx.stroke();
       }
     });
+
+
+
+
+
 
     // Draw robot position
     if (robotPosition) {
@@ -492,6 +517,11 @@ const GameField = () => {
       );
     }
 
+
+
+
+
+
     // Draw origin marker
     ctx.fillStyle = 'lime';
     ctx.beginPath();
@@ -515,6 +545,17 @@ const GameField = () => {
       }
     };
   }, [drawField]);
+
+
+
+
+
+
+
+
+
+
+
 
   return (
     <div style={styles.container}>
@@ -642,6 +683,28 @@ const GameField = () => {
     </div>
   );
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Enhanced styles with better organization
 const styles = {
