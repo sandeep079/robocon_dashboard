@@ -59,18 +59,18 @@ Build robocon_dashboard from the source and install dependencies:
    ```bash
    git clone https://github.com/sandeep079/robocon_dashboard
 
-Navigate to the project directory:
-bash
+2. **Navigate to the project directory:**
+```bash
 
 cd robocon_dashboard
-
-Install the dependencies:
+```
+3. **Install the dependencies:**
 
 Using npm:
-bash
+```bash
 
 npm install
-
+```
 Usage
 
 Run the project with:
