@@ -2,8 +2,6 @@
 
 Empowering Robotics with Seamless Real-Time Control
 
-> **Last commit:** July 2024
-
 ## Overview
 
 `robocon_dashboard` is an open-source developer tool that simplifies building and testing robotics web interfaces using React, TypeScript, and Vite. It provides a reliable development environment with seamless ROS Bridge integration and real-time visualization components.
