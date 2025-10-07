@@ -56,14 +56,14 @@ This project requires the following dependencies:
 Build robocon_dashboard from the source and install dependencies:
 
 1. **Clone the repository:**
-   ```bash
+```bash
    git clone https://github.com/sandeep079/robocon_dashboard
-
+```
 2. **Navigate to the project directory:**
-   ```bash
+```bash
 
-   cd robocon_dashboard
-   ```
+ cd robocon_dashboard
+  ```
 3. **Install the dependencies:**
 
 Using npm:
