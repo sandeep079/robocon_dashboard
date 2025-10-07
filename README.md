@@ -62,37 +62,36 @@ Build robocon_dashboard from the source and install dependencies:
 2. **Navigate to the project directory:**
 ```bash
 
-cd robocon_dashboard
+   cd robocon_dashboard
 ```
 3. **Install the dependencies:**
 
 Using npm:
 ```bash
-
-npm install
+  npm install
 ```
-Usage
+4. **Usage**
 
 Run the project with:
 
 Using npm:
-bash
+```bash
 
 npm start
-
-Testing
+```
+5. **Testing**
 
 Robocon_dashboard uses the test framework for comprehensive testing. Run the test suite with:
 
 Using npm:
-bash
+```bash
 
 npm test
-
-Contributing
+```
+6. **Contributing**
 
 We welcome contributions! Please feel free to submit pull requests, report bugs, or suggest new features.
-License
+7. **License**
 
 This project is open source and available under the MIT License.
 
