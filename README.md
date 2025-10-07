@@ -60,16 +60,16 @@ Build robocon_dashboard from the source and install dependencies:
    git clone https://github.com/sandeep079/robocon_dashboard
 
 2. **Navigate to the project directory:**
-```bash
+   ```bash
 
    cd robocon_dashboard
-```
+   ```
 3. **Install the dependencies:**
 
 Using npm:
-```bash
+  ```bash
   npm install
-```
+  ```
 4. **Usage**
 
 Run the project with:
@@ -91,22 +91,10 @@ npm test
 6. **Contributing**
 
 We welcome contributions! Please feel free to submit pull requests, report bugs, or suggest new features.
+
 7. **License**
 
 This project is open source and available under the MIT License.
 
-ROBOCON_DASHBOARD - Streamlining robotics interface development with modern web technologies.
-text
-
-
-This README includes:
-- Professional badges for technologies
-- Clear section organization
-- Proper code formatting
-- Complete installation and usage instructions
-- Consistent styling with your original content
-- Added sections for Contributing and License (you can modify these as needed)
-
-The README maintains the same tone and information from your screenshots while presenting it in a more structured and professional format suitable for GitHub.
 
 
